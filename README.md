@@ -11,6 +11,8 @@ USAGE
 Create a client using OAuth 2.
 
 ```
+var TwitterAppOnly = require('twitter-apponly');
+
 var keys = {
   consumer_key: '',
   consumer_secret: '',
@@ -18,7 +20,7 @@ var keys = {
   bearer_url: 'https://api.twitter.com/oauth2/token'
 };
 
-var client = new Twit(keys);
+var client = new TwitterAppOnly(keys);
 ```
 
 Make requests.

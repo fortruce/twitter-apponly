@@ -1,6 +1,6 @@
 {
   "name": "twitter-apponly",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An Application Only Auth Twitter Api Client that returns promises.",
   "main": "twit.js",
   "author": "Joseph Rollins <rollins.joseph@gmail.com> (http://josephmr.com)",
