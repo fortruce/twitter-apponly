@@ -1,0 +1,16 @@
+{
+  "name": "twitter-apponly",
+  "version": "0.0.3",
+  "description": "An Application Only Auth Twitter Api Client that returns promises.",
+  "main": "twit.js",
+  "author": "Joseph Rollins <rollins.joseph@gmail.com> (http://josephmr.com)",
+  "repository": {
+  	"type": "git",
+  	"url": "https://github.com/fortruce/twitter-apponly.git"
+  },
+  "dependencies": {
+    "promise": "^7.0.0",
+    "request": "^2.55.0",
+    "urlencode": "^1.0.0"
+  }
+}
