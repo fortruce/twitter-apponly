@@ -12,6 +12,10 @@ function Twitter(o) {
  
   this._generateCredentials();
   this.bearer_token = this._getBearerToken();
+  
+  this.bearer_token.done(null, function (err) {
+    throw new Error(err);
+  });
 }
  
 Twitter.prototype._generateCredentials = function() {
@@ -51,25 +55,17 @@ Twitter.prototype._buildEndpoint = function(endpoint, params) {
   return u + '.json?' + qs.encode(params);
 };
 
-Twitter.prototype._buildOpts = function(endpoint) {
-  return new Promise(function (fulfill, reject) {
-    this.bearer_token.then(function(bearer_token) {
-      var opts = {
-        url: endpoint,
-        headers: {
-          'Authorization': 'Bearer ' + bearer_token
-        }
-      };
-      fulfill(opts);
-    }.bind(this), reject);
-  }.bind(this));
-};
-
 Twitter.prototype.get = function (endpoint, params) {
   return new Promise(function(fulfill, reject) {
-    var u = this._buildEndpoint(endpoint, params);
+    this.bearer_token.then(function (bearer_token) {
+      var u = this._buildEndpoint(endpoint, params);
+      var opts = {
+        url: this._buildEndpoint(endpoint, params),
+        headers: {
+          'Authorization': 'Bearer' + bearer_token
+        }
+      };
 
-    this._buildOpts(u).then(function (opts) {
       request.get(opts, function(err, resp, body) {
         if (err) {
           reject(err);
@@ -83,7 +79,7 @@ Twitter.prototype.get = function (endpoint, params) {
 
         reject(new Error('Status: ' + resp.statusCode + '\n' + body.toString()));
       });
-    }, reject);
+    }.bind(this), reject);
   }.bind(this));
 }; 
 
