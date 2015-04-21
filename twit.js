@@ -49,21 +49,12 @@ function handleTwitterResponse(cb) {
   }
 }
 
-function Twitter(consumer_key, consumer_secret) {
-  this.credentials = generateCredentials(consumer_key, consumer_secret);
-  this.bearer_token = this._getBearerToken();
-}
-
-/**
- * Returns a promise that resolves to a bearer_token.
- * @return {Promise}
- */
-Twitter.prototype._getBearerToken = function() {
+function getBearerToken (credentials) {
   var opts = {
     url: BEARER_ENDPOINT,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      'Authorization': 'Basic ' + this.credentials
+      'Authorization': 'Basic ' + credentials
     },
     body: 'grant_type=client_credentials'
   };
@@ -73,6 +64,11 @@ Twitter.prototype._getBearerToken = function() {
     return body.access_token;
   }));
 };
+
+function Twitter(consumer_key, consumer_secret) {
+  var credentials = generateCredentials(consumer_key, consumer_secret);
+  this.token = getBearerToken(credentials);
+}
 
 /**
  * Returns a function that expects a bearer_token and exectues an api request to the endpoint with params.
@@ -97,7 +93,7 @@ Twitter.prototype._request = function(endpoint, params) {
 }
 
 Twitter.prototype.get = function (endpoint, params) {
-  return this.bearer_token.then(this._request(endpoint, params));
+  return this.token.then(this._request(endpoint, params));
 }; 
 
 module.exports = Twitter;
