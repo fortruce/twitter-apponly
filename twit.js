@@ -4,11 +4,12 @@ var request = require('request'),
   qs = require('querystring'),
 	Promise = require('promise');
 
+var API_BASE = 'https://api.twitter.com/1.1/';
+var BEARER_ENDPOINT = 'https://api.twitter.com/oauth2/token';
+
 function Twitter(o) {
   this.consumer_key = o.consumer_key;
   this.consumer_secret = o.consumer_secret;
-  this.bearer_url = o.bearer_url;
-  this.api_base = o.api_base;
  
   this._generateCredentials();
   this.bearer_token = this._getBearerToken();
@@ -25,7 +26,7 @@ Twitter.prototype._generateCredentials = function() {
  
 Twitter.prototype._getBearerToken = function() {
   var opts = {
-    url: this.bearer_url,
+    url: BEARER_ENDPOINT,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
       'Authorization': 'Basic ' + this.bearer_token_credentials
@@ -51,7 +52,7 @@ Twitter.prototype._getBearerToken = function() {
 };
 
 Twitter.prototype._buildEndpoint = function(endpoint, params) {
-  var u = url.resolve(this.api_base, endpoint);
+  var u = url.resolve(API_BASE, endpoint);
   return u + '.json?' + qs.encode(params);
 };
 
