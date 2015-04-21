@@ -13,23 +13,19 @@ Create a client using OAuth 2.
 ```
 var TwitterAppOnly = require('twitter-apponly');
 
-var keys = {
-  consumer_key: '',
-  consumer_secret: '',
-  api_base: 'https://api.twitter.com/1.1/',
-  bearer_url: 'https://api.twitter.com/oauth2/token'
-};
+var consumer_key = '';
+var consumer_secret = '';
 
-var client = new TwitterAppOnly(keys);
+var client = new TwitterAppOnly(consumer_key, consumer_secret);
 ```
 
 Make requests.
 
 ```
 // query the twitter search api for #javascript hashtagged tweets
-var promise = client.get('search/tweets', {q: '#javascript'});
-promise.then(function (tweets) {
-	tweets.forEach(function (tweet) {
+var resp = client.get('search/tweets', {q: '#javascript'});
+resp.then(function (tweets) {
+	tweets.statuses.forEach(function (tweet) {
 		console.log(tweet.text);
 	});
 });

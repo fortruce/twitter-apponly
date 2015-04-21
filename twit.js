@@ -1,29 +1,25 @@
-var request = require('request'),
-	urlencode = require('urlencode'),
-  url = require('url'),
-  qs = require('querystring'),
-	Promise = require('promise');
+var urlencode = require('urlencode'),
+    url = require('url'),
+    qs = require('querystring'),
+    Promise = require('bluebird'),
+    request = Promise.promisifyAll(require('request'));
 
 var API_BASE = 'https://api.twitter.com/1.1/';
 var BEARER_ENDPOINT = 'https://api.twitter.com/oauth2/token';
 
-function Twitter(o) {
-  this.consumer_key = o.consumer_key;
-  this.consumer_secret = o.consumer_secret;
- 
+function Twitter(consumer_key, consumer_secret) {
+  this.consumer_key = consumer_key;
+  this.consumer_secret = consumer_secret;
+
   this._generateCredentials();
   this.bearer_token = this._getBearerToken();
-  
-  this.bearer_token.done(null, function (err) {
-    throw new Error(err);
-  });
 }
- 
+
 Twitter.prototype._generateCredentials = function() {
 	this.bearer_token_credentials = [urlencode(this.consumer_key), urlencode(this.consumer_secret)].join(':');
   this.bearer_token_credentials = new Buffer(this.bearer_token_credentials).toString('base64');
 };
- 
+
 Twitter.prototype._getBearerToken = function() {
   var opts = {
     url: BEARER_ENDPOINT,
@@ -33,21 +29,18 @@ Twitter.prototype._getBearerToken = function() {
     },
     body: 'grant_type=client_credentials'
   };
- 
-  return new Promise(function (fulfill, reject) {
-  	request.post(opts, function(err, resp, body) {
-  		if (err) {
-        reject(err);
-      }
 
-  		if (resp.statusCode === 200 && body) {
-  			body = JSON.parse(body);
-  			fulfill(body.access_token);
-  			return;
-  		}
+  return request.postAsync(opts)
+  .then(function (r) {
+    var resp = r[0];
+    var body = r[1];
+    if (resp.statusCode === 200) {
+      body = JSON.parse(body);
+      console.log('access:', body.access_token);
+      return body.access_token;
+    }
 
-  		reject(new Error('Failed to acquire bearer token: ' + body));
-  	});
+    throw new Error('Failed to acquire bearer token: ' + body.toString());
   });
 };
 
@@ -57,30 +50,20 @@ Twitter.prototype._buildEndpoint = function(endpoint, params) {
 };
 
 Twitter.prototype.get = function (endpoint, params) {
-  return new Promise(function(fulfill, reject) {
-    this.bearer_token.then(function (bearer_token) {
-      var u = this._buildEndpoint(endpoint, params);
-      var opts = {
-        url: this._buildEndpoint(endpoint, params),
-        headers: {
-          'Authorization': 'Bearer' + bearer_token
-        }
-      };
+  return this.bearer_token.then(function (bearer_token) {
+    var u = this._buildEndpoint(endpoint, params);
+    var opts = {
+      url: this._buildEndpoint(endpoint, params),
+      headers: {
+        'Authorization': 'Bearer ' + bearer_token
+      }
+    };
 
-      request.get(opts, function(err, resp, body) {
-        if (err) {
-          reject(err);
-        }
-
-        if (resp.statusCode === 200) {
-          body = JSON.parse(body);
-          fulfill(body);
-          return;
-        }
-
-        reject(new Error('Status: ' + resp.statusCode + '\n' + body.toString()));
-      });
-    }.bind(this), reject);
+    return request.getAsync(opts)
+    .then(function (r) {
+      var body = r[1];
+      return JSON.parse(body);
+    });
   }.bind(this));
 }; 
 
