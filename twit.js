@@ -27,6 +27,13 @@ function buildEndpoint (endpoint, params) {
   return u + '.json?' + qs.encode(params);
 };
 
+/**
+ * Returns a function that calls callback on successful api response.
+ * Throws TwitterError on api failure.
+ * @param  {Function} Optional callback to be called on successful api data.
+ *                    If no callback, handler function returns the api body.
+ * @return {Function}
+ */
 function handleTwitterResponse(cb) {
   return function (r) {
     var resp = r[0];
@@ -47,6 +54,10 @@ function Twitter(consumer_key, consumer_secret) {
   this.bearer_token = this._getBearerToken();
 }
 
+/**
+ * Returns a promise that resolves to a bearer_token.
+ * @return {Promise}
+ */
 Twitter.prototype._getBearerToken = function() {
   var opts = {
     url: BEARER_ENDPOINT,
@@ -63,6 +74,12 @@ Twitter.prototype._getBearerToken = function() {
   }));
 };
 
+/**
+ * Returns a function that expects a bearer_token and exectues an api request to the endpoint with params.
+ * @param  {String} Twitter api endpoint to query.
+ * @param  {Object} Params to send to the Api Endpoint.
+ * @return {Function} Function that expects a bearer_token and executes an authenticated api rquest. 
+ */
 Twitter.prototype._request = function(endpoint, params) {
   var u = buildEndpoint(endpoint, params);
 
